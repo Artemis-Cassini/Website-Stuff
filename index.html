@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artemis Cassini — Personal Site</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    /* ========= THEME ========= */
+    :root{
+      --bg: #0c0a16;          /* deep space */
+      --ink: #f5f1ff;         /* text on dark */
+      --muted:#cfc5ff;        /* secondary text */
+      --p1:#3E1F92;           /* deep purple */
+      --p2:#6B32E1;           /* primary purple */
+      --p3:#9C7CFF;           /* accent purple */
+      --card:#16122a;         /* card bg */
+      --line:#2a2144;         /* borders */
+      --glow: 0 10px 30px rgba(156,124,255,.25);
+    }
+
+    /* ========= RESET / BASE ========= */
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    html{scroll-behavior:smooth}
+    img{max-width:100%;display:block}
+    a{color:var(--p3);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* ========= COSMIC BACKGROUND (decorative) ========= */
+    .cosmos{position:fixed; inset:0; z-index:-2; pointer-events:none; overflow:hidden;}
+    .starfield, .starfield2{
+      position:absolute; inset:0;
+      background:
+        radial-gradient(rgba(255,255,255,.7) 1px, transparent 1.5px) 0 0/3px 3px,
+        radial-gradient(rgba(156,124,255,.6) 1px, transparent 1.5px) 1.5px 1.5px/4px 4px;
+      opacity:.25;
+      animation: drift 120s linear infinite;
+      filter: saturate(120%) hue-rotate(10deg);
+    }
+    .starfield2{
+      opacity:.18;
+      transform: scale(1.3);
+      animation-duration: 180s;
+    }
+
+    /* Solar-system cluster (subtle, low-contrast) */
+    .system{
+      position:absolute; left:50%; top:38vh; width:70vmin; height:70vmin;
+      transform: translate(-50%,-50%);
+      opacity:.35; filter: drop-shadow(0 0 12px rgba(156,124,255,.15));
+    }
+    .sun{
+      position:absolute; left:50%; top:50%; width:28vmin; height:28vmin;
+      transform: translate(-50%,-50%);
+      background: radial-gradient(circle at 30% 30%, #ffb6ff, #b58cff, #6b32e1 60%, transparent 62%);
+      border-radius:50%;
+      box-shadow: 0 0 60px rgba(156,124,255,.25), inset 0 0 30px rgba(255,255,255,.15);
+    }
+    .orbit{
+      position:absolute; left:50%; top:50%; border:1px dashed rgba(156,124,255,.35);
+      border-radius:50%; transform: translate(-50%,-50%);
+    }
+    .o1{ width:36vmin; height:36vmin; animation: spin 40s linear infinite;}
+    .o2{ width:48vmin; height:48vmin; animation: spin 70s linear infinite;}
+    .o3{ width:58vmin; height:58vmin; animation: spin 110s linear infinite;}
+    .o4{ width:66vmin; height:66vmin; animation: spin 160s linear infinite;}
+
+    .planet{
+      position:absolute; left:50%; top:-6px; transform: translateX(-50%);
+      width:12px; height:12px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, #d8cfff, #9c7cff);
+      box-shadow: var(--glow);
+    }
+    .p1{ width:10px; height:10px;}
+    .p2{ width:12px; height:12px;}
+    .p3{ width:9px;  height:9px;}
+    .p4{ width:14px; height:14px;}
+
+    /* Reduce motion */
+    @media (prefers-reduced-motion: reduce){
+      .starfield, .starfield2, .o1, .o2, .o3, .o4{ animation: none !important; }
+    }
+
+    @keyframes drift{
+      0% {transform: translateY(0)}
+      100% {transform: translateY(-400px)}
+    }
+    @keyframes spin{
+      to { transform: translate(-50%,-50%) rotate(360deg); }
+    }
+
+    /* Readability veil at very top */
+    .veil{
+      position:fixed; inset:0 0 auto 0; height:30vh; z-index:-1;
+      background: linear-gradient(180deg, rgba(12,10,22,0.85), rgba(12,10,22,0));
+    }
+
+    /* ========= LAYOUT UI ========= */
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: saturate(180%) blur(8px);
+      background: linear-gradient(180deg, rgba(12,10,22,.85), rgba(12,10,22,.55));
+      border-bottom:1px solid var(--line);
+    }
+    .nav{max-width:1100px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px;}
+    .brand{font-weight:800; letter-spacing:.3px}
+    .links{display:flex; gap:10px; flex-wrap:wrap}
+    .links a{padding:8px 12px; border-radius:10px; border:1px solid transparent}
+    .links a:hover{border-color:var(--line); background:rgba(156,124,255,.08)}
+
+    .hero{
+      max-width:1100px; margin:42px auto 16px; padding:0 20px;
+      display:grid; grid-template-columns:120px 1fr; gap:18px;
+    }
+    .pfp{
+      width:120px; height:120px; border-radius:22px; object-fit:cover;
+      border:2px solid var(--line); box-shadow: var(--glow);
+    }
+    h1{margin:0 0 6px 0; font-size: clamp(28px,4vw,40px)}
+    .accent{color:var(--p3)}
+    .tagline{margin:0; color:var(--muted)}
+    .chips{margin-top:10px; display:flex; flex-wrap:wrap; gap:8px}
+    .chip{
+      font-size:12px; padding:6px 10px; border:1px solid var(--line);
+      border-radius:999px; background: rgba(62,31,146,.28)
+    }
+
+    .section{max-width:1100px; margin:28px auto; padding:0 20px}
+    .kicker{color:var(--muted); font-weight:600; letter-spacing:.2px; text-transform:uppercase; font-size:12px; margin:0 0 10px}
+    .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    }
+    .card h2, .card h3{margin-top:0}
+    .compact{margin:6px 0 0 20px}
+
+    .contact{list-style:none; padding:0; margin:0}
+    .contact li{display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed rgba(156,124,255,.25)}
+    .contact li:last-child{border-bottom:none}
+    .contact span{color:var(--muted); min-width:72px; display:inline-block}
+
+    .site-foot{max-width:1100px; margin:34px auto 60px; padding:0 20px; color:var(--muted)}
+
+    /* Mobile tweaks */
+    @media (max-width:720px){
+      .hero{grid-template-columns:1fr; text-align:left}
+      .pfp{margin-bottom:4px}
+    }
+  </style>
+</head>
+<body>
+  <!-- decorative background -->
+  <div class="cosmos" aria-hidden="true">
+    <div class="starfield"></div>
+    <div class="starfield2"></div>
+    <div class="system">
+      <div class="sun"></div>
+      <div class="orbit o1"><span class="planet p1"></span></div>
+      <div class="orbit o2"><span class="planet p2"></span></div>
+      <div class="orbit o3"><span class="planet p3"></span></div>
+      <div class="orbit o4"><span class="planet p4"></span></div>
+    </div>
+  </div>
+  <div class="veil" aria-hidden="true"></div>
+
+  <body>
+  <!-- site header with navigation -->
+  <header class="site-header">
+    <nav class="nav">
+      <div class="brand">Artemis Cassini</div>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="calendar.html">Calendar</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- hero -->
+  <section class="hero">
+    <img class="pfp" src="https://apod.nasa.gov/apod/image/2508/Crab_HubbleChandraSpitzer_1080.jpg" alt="Profile picture of Artemis"/>
+    <div>
+      <h1><span class="accent">Artemis Cassini</span>.</h1>
+      <p class="tagline">Jack of all trades, master of none. Knowledge is power.</p>
+      <div class="chips">
+        <span class="chip">he/him // they/them</span>
+        <span class="chip">likes - math • science • tech • coding • space • writing • music • art</span>
+        <span class="chip">dislikes - spiders • snakes • daylight • cold • early mornings</span>
+        <span class="chip">trans • bisexual • nebularomantic • demiboy • quoiromantic </span>
+        <span class="chip">artists - Artic Monkeys • Brenn! • Glass Animals • Lord Huron • Gigi Perez • Owl City • TØP</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- about -->
+  <section id="about" class="section">
+    <p class="kicker">About</p>
+    <div class="card">
+      <h2>About Me</h2>
+      <p>I'm Artemis, a creator of many things, learner of all, and master of absolutely none of them.
+        Some things to note about me is that I'm a pretty quiet person, but also a curious one at that. 
+        I love my dog, Poppy, a lot and spending lots of time with her every day! I love to create things to help myself and other people,
+        from the dimensional analysis calculator to personal projects such as password storage.
+      </p>
+    </div>
+  </section>
+
+  <!-- projects -->
+  <section id="projects" class="section">
+    <p class="kicker">Projects</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Dimensional Analysis Calculator <span class="accent">— Most Recent</span></h3>
+        <p>I hate dimensional analysis so much that i quite literally created a calculator to help others and myself with the chemistry concept.
+          Hopefully it can help you too!
+          <li>
+           <a href="https://dimensionalanalysis.solutions/" target="_blank">
+            <i class="fas fa-flask"></i> Dimensional Analysis Solutions
+           </a>
+          </li>
+        </p>
+      </article>
+      <article class="card">
+        <h3>Rust &amp; Ruby <span class="accent">— Ongoing</span></h3>
+        <p>A space where I explore different ways to make ethical AI, and personal assistants who I have created.
+          <li>
+           <a href="https://github.com/Artemis-Cassini/Rust-Ruby" target="_blank">
+            <i class="fas fa-cog"></i> Rust & Ruby
+           </a>
+          </li>
+        </p>
+      </article>
+      <article class="card">
+        <h3>Collatz Conjecture Work <span class="accent">— Ongoing</span></h3>
+        <p>Explorations of sequences and behaviors, with visualizations and proofs-in-progress.
+          <li>
+           <a href="https://github.com/Artemis-Cassini/Collatz-Conjecture" target="_blank">
+            <i class="fas fa-calculator"></i> Collatz-Conjecture
+           </a>
+          </li>
+        </p>
+      </article>
+      <article class="card">
+        <h3>Isosceles Triangle Madness <span class="accent">— Project Finished </span></h3>
+        <p>Geometry deep-dives, derivations, and problem sets that spiral delightfully out of hand.
+          <li>
+           <a href="https://github.com/Artemis-Cassini/Personal" target="_blank">
+            <i class="fas fa-microchip"></i> Personal Projects
+           </a>
+          </li>
+        </p>
+      </article>
+      <article class="card">
+        <h3>Password Projects <span class="accent">— Personal</span></h3>
+        <p>Password projects I have created include my password manager and password generator.
+          <li>
+           <a href="https://github.com/Artemis-Cassini/Passwords" target="_blank">
+            <i class="fas fa-key"></i> Passwords
+           </a>
+          </li>
+        </p>
+      </article>
+       <article class="card">
+        <h3>College Works <span class="accent">— Personal + Ongoing</span></h3>
+        <p>Projects I work on for my college classes.
+          <li>
+           <a href="https://github.com/Artemis-Cassini/College-Class-Work" target="_blank">
+            <i class="fas fa-school"></i> College
+           </a>
+          </li>
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <!-- interact -->
+  <section id="interact" class="section">
+    <p class="kicker">Notices</p>
+    <div class="card">
+      <h2>Disorders</h2>
+      <p>I have a couple of mental and physical disorders such as OCD, ADD, ADHD, Autism, Anxiety, Depression, POTS, & Scoliosis</p>
+      <h3 style="margin-bottom:6px">Do NOT Interact with me if..</h3>
+      <ul class="compact">
+        <li>Racist, Homophobic • Transphobic • Proshipper • Mean • Disrespectful • Ableist</li>
+      </ul>
+      <h3 style="margin-bottom:6px">DO Interact with me if..</h3>
+      <ul class="compact">
+        <li>Coder • Builder • Gamer • Space Lover • Kind • LGBTQ+ • Jet Lag The Game Fan</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section id="contact" class="section">
+  <p class="kicker">Contact</p>
+  <div class="card">
+    <h2>Find me online</h2>
+    <ul class="contact">
+      <li>
+        <a href="https://discord.com/channels/@me" target="_blank">
+          <i class="fa-brands fa-discord"></i> Discord
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/Artemis-Cassini" target="_blank">
+          <i class="fa-brands fa-github"></i> GitHub
+        </a>
+      </li>
+      <li>
+        <a href="https://www.tiktok.com/@artemis_cassini" target="_blank">
+          <i class="fa-brands fa-tiktok"></i> TikTok
+        </a>
+      </li>
+      <li>
+        <a href="https://steamcommunity.com/id/Artemis_Cassini" target="_blank">
+          <i class="fa-brands fa-steam"></i> Steam
+        </a>
+      </li>
+      <li>
+        <a href="https://leetcode.com/profile/" target="_blank">
+          <i class="fa-solid fa-code"></i> LeetCode
+        </a>
+      </li>
+      <li>
+        <a href="https://www.instagram.com/artemis_cassini/" target="_blank">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+      </li>
+      <li>
+        <a href="https://www.reddit.com/user/artemis_music/" target="_blank">
+          <i class="fab fa-reddit-alien"></i> Reddit
+        </a>
+      </li>
+      <li>
+        <a href="https://www.roblox.com/users/103241839/profile" target="_blank">
+          <i class="fas fa-square"></i> Roblox
+        </a>
+      </li>
+      <li>
+        <a href="https://bsky.app/profile/artemiscassini.bsky.social" target="_blank">
+          <i class="fas fa-cloud"></i> Bluesky
+        </a>
+      </li>
+      <li>
+        <a href="https://steamcommunity.com/profiles/76561199249059447/" target="_blank">
+          <i class="fab fa-steam-symbol"></i> Steam
+        </a>
+      </li>
+      <li>
+        <a href="https://musescore.com/user/40695614" target="_blank">
+          <i class="fas fa-music"></i> Musescore
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+  <footer class="site-foot">
+    <small>© <span id="year"></span> Artemis Cassini • Created with Curiosity</small>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

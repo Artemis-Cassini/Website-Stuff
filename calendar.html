@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artemis Cassini — Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg: #0c0a16;
+      --ink: #f5f1ff;
+      --muted:#cfc5ff;
+      --p1:#3E1F92;
+      --p2:#6B32E1;
+      --p3:#9C7CFF;
+      --card:#16122a;
+      --line:#2a2144;
+      --glow: 0 10px 30px rgba(156,124,255,.25);
+    }
+    .filters {
+  max-width:1100px;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  gap: 20px;
+  font-weight: 600;
+}
+
+.filters input {
+  margin-right: 6px;
+}
+
+.band { color: #b88ce0; font-weight:600; }
+.school { color: #9C7CFF; font-weight:600; }
+.personal { color: #672e90; font-weight:600; }
+.clubs { color: #7c3496; font-weight:600; }
+.holidays { color: #ac42d2; font-weight:600; }
+
+.contact-form {
+  max-width: 600px;
+  margin: 40px auto;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--glow);
+}
+.contact-form h2 {
+  margin-top:0;
+  color: var(--p3);
+}
+.contact-form input,
+.contact-form textarea,
+.contact-form button {
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+}
+.contact-form button {
+  background: var(--p2);
+  cursor: pointer;
+  font-weight: bold;
+}
+.contact-form button:hover {
+  background: var(--p3);
+}
+
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui;}
+    a{color:var(--p3);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .site-header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: saturate(180%) blur(8px);
+      background: linear-gradient(180deg, rgba(12,10,22,.85), rgba(12,10,22,.55));
+      border-bottom:1px solid var(--line);
+    }
+    .nav{max-width:1100px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between;}
+    .brand{font-weight:800;}
+    .links{display:flex; gap:10px;}
+    .links a{padding:8px 12px; border-radius:10px;}
+    .links a:hover{border:1px solid var(--line); background:rgba(156,124,255,.08)}
+
+    main{max-width:1100px;margin:32px auto;padding:0 20px;}
+
+    .calendar{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 6px 20px rgba(0,0,0,.25);}
+    .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;color:var(--p3);font-weight:700;font-size:1.4rem;}
+    .calendar-header button{background:var(--p2);border:none;color:var(--ink);padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:600;}
+    .calendar-header button:hover{background:var(--p3);}
+
+    .days-of-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;}
+    .days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px;}
+    .day-cell {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-height: 80px;
+  max-height: 120px; /* limit how tall the box can grow */
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* prevents content from spilling out */
+}
+    .day-number{font-weight:700;margin-bottom:4px;color:var(--p3);}
+    .day-content {
+  flex-grow: 1;
+  background: var(--card);
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 0.85rem;
+  overflow-y: auto;   /* adds vertical scroll */
+  max-height: 90px;   /* keeps content inside */
+}
+    .day-content:empty:before{content:"";color:var(--muted);}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr); /* default: 7 columns */
+  gap: 8px;
+  margin-top: 12px;
+}
+
+@media (max-width: 800px) {
+  .days-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 columns on tablets */
+  }
+}
+
+@media (max-width: 500px) {
+  .days-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on small phones */
+  }
+}
+
+.two-column {
+  display: flex;
+  align-items: center;   /* center them vertically */
+  justify-content: space-between;
+  gap: 25px;
+  max-width: 1100px;
+  margin: 40px auto;
+}
+
+.contact-form {
+  flex: 3;            /* takes about 2/3 of row */
+  max-width: 70%;
+}
+
+
+.contact-form, .schedule-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--glow);
+}
+
+@media (max-width: 768px) {
+  .two-column {
+    flex-direction: column;
+  }
+  .contact-form, .schedule-box {
+    max-width: 100%;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <div class="brand">Artemis Cassini</div>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="calendar.html" aria-current="page">Calendar</a>
+      </div>
+    </nav>
+  </header>
+
+<div class="filters">
+  <label><input type="checkbox" checked id="toggle-band"> Band</label>
+  <label><input type="checkbox" checked id="toggle-school"> School</label>
+  <label><input type="checkbox" checked id="toggle-personal"> Personal</label>
+  <label><input type="checkbox" checked id="toggle-clubs"> Clubs</label>
+  <label><input type="checkbox" checked id="toggle-holidays"> Holidays</label>
+</div>
+
+  <main>
+    <section class="calendar">
+      <div class="calendar-header">
+        <button id="prev-month">&lt;</button>
+        <div id="month-name">Month</div>
+        <button id="next-month">&gt;</button>
+      </div>
+      <div class="days-of-week">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="days-grid" id="days-grid"></div>
+    </section>
+  </main>
+
+<div class="two-column">
+  <section class="contact-form">
+    <h2>Request an Appointment</h2>
+    <form action="https://usebasin.com/f/2b8f082ab2ff" method="POST">
+      <label>Name:<br><input type="text" name="name" required></label><br>
+      <label>Email:<br><input type="email" name="email" required></label><br>
+      <label>Date:<br><input type="date" name="date" required></label><br>
+      <label>Message:<br><textarea name="message" rows="4"></textarea></label><br>
+      <button type="submit">Send Request</button>
+    </form>
+  </section>
+
+  <section class="schedule-box">
+    <h2>Daily School Schedule</h2>
+    <ul>
+      <li>1st Period - Band - {8:15-8:57am}</li>
+      <li>2nd Period - Study Hall - {9:00-9:46am}</li>
+      <li>3rd Period - English - {9:49-10:32am}</li>
+      <li>4th Period - Algebra - {10:35-11:13am}</li>
+      <li>Tribe Time - {11:16-11:46am}</li>
+      <li>Lunch - {11:49am-12:16pm}</li>
+      <li>5th Period - Spanish - {12:19-1:01pm}</li>
+      <li>6th Period - Career Class - {1:04-1:46pm}</li>
+      <li>7th Period - Understanding Computers {Online} - {1:49-3:17pm}</li>
+      <li>8th Period - Python Programming {Online} - {1:49-3:17pm}</li>
+      <li><b>Please note that I leave every day at 1:46pm and I do NOT return!!</b></li>
+    </ul>
+  </section>
+</div>
+
+  <footer style="text-align:center; color:var(--muted); margin:30px;">
+    <small>© <span id="year"></span> Artemis Cassini</small>
+  </footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const monthNameEl = document.getElementById('month-name');
+  const daysGrid = document.getElementById('days-grid');
+  const prev = document.getElementById('prev-month');
+  const next = document.getElementById('next-month');
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+  let currentDate = new Date();
+
+const events = { 
+
+////////// October //////////
+
+  "2025-10-01": [{ text: "Band Practice {7-8am}", category: "band" }],
+  "2025-10-02": [
+    { text: "The Crucible Test {9:49-10:32am}", category: "school" },
+    { text: "NHS Meeting {11:46am-12:16pm}", category: "school" },
+    { text: "Spanish Test {12:19-1:01pm}", category: "school" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Band Practice {6-8pm}", category: "band" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-10-03": [{ text: "Home Football Game {5:30pm}", category: "band" }],
+  "2025-10-04": [{ text: "Competition {1pm}", category: "band" }],
+  "2025-10-06": [
+    { text: "No School", category: "school" },
+    { text: "Module 8 Due {8am}", category: "school" },
+    { text: "Week 6 Due {9am}", category: "school" },
+    { text: "Scho-Bowl {3:30pm}", category: "clubs" },
+],
+  "2025-10-07": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" }
+],
+  "2025-10-08": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Appointment {3-4pm}", category: "personal" },
+    { text: "Snare Drum Practice {6:30-7:30pm}", category: "band" }
+],
+  "2025-10-09": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Band Practice {6-8pm}", category: "band" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-10-10": [{ text: "Away Football Game {5:15pm}", category: "band" }],
+  "2025-10-11": [{ text: "Competition {6am}", category: "band" }],
+  "2025-10-13": [
+    { text: "Columbus Day", category: "holidays" },
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Module 9 Due {8am}", category: "school" },
+    { text: "Week 7 Due {9am}", category: "school" },
+    { text: "Scho-bowl Practice {11:13am-12:16pm}", category: "clubs" },
+    { text: "Scho-bowl {3:30pm}", category: "clubs" }
+],
+  "2025-10-14": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" }
+],
+  "2025-10-15": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Snare Drum Practice {4:30-5pm}", category: "band" }
+  ],
+  "2025-10-16": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Band Practice {6-8pm}", category: "band" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-10-17": [
+    { text: "Sister's Birthday!!!!", category: "personal" },
+    { text: "Away Football Game {5pm}", category: "band" },
+],
+  "2025-10-18": [{ text: "Competition {TBA}", category: "band" }],
+  "2025-10-20": [
+    { text: "Module 10 Due {8am}", category: "school" },
+    { text: "Week 8 Due {9am}", category: "school" },
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Scho-bowl Practice {11:13am-12:16pm}", category: "clubs" },
+    { text: "Scho-bowl {3:30pm}", category: "clubs" }
+],
+  "2025-10-21": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" }
+],
+  "2025-10-22": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Appointment {2:30-3:30pm}", category: "personal" },
+    { text: "Snare Drum Practice {6:30-7:30pm}", category: "band" }
+],
+  "2025-10-23": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "Poppy Groomer {11:30am}", category: "personal" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Band Practice {6-8pm}", category: "band" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-10-24": [{ text: "Home Football Game {5:45pm}", category: "band" }],
+  "2025-10-25": [{ text: "SMBF {TBA}", category: "band" }],
+  "2025-10-26": [{ text: "Halloween Parage {TBA}", category: "band" }],
+  "2025-10-27": [
+    { text: "Module 11 Due {8am}", category: "school" },
+    { text: "Week 9 Due {9am}", category: "school" },
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Scho-bowl Practice {11:13am-12:16pm}", category: "clubs" },
+    { text: "Scho-bowl {3:30pm}", category: "clubs" }
+],
+  "2025-10-28": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" }
+],
+  "2025-10-29": [
+    { text: "Band Practice {7-8am}", category: "band" },
+    { text: "Snare Drum Practice {4:30-5pm}", category: "band" }
+],
+  "2025-10-30": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Band Practice {6-8pm}", category: "band" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-10-31": [
+    { text: "Halloween", category: "holidays" },
+    { text: "Playoff Football {TBA}", category: "band" }
+],
+
+////////// November //////////
+
+  "2025-11-01": [{ text: "SMBF {TBA}", category: "band" }],
+  "2025-11-02": [
+    { text: "Day of the Dead", category: "holidays" },
+    { text: "SMBF {TBA}", category: "band" }
+],
+  "2025-11-03": [
+    { text: "Scho-bowl Practice {11:13am-12:16pm}", category: "clubs" },
+    { text: "Scho-bowl {3:30pm}", category: "clubs" }
+],
+  "2025-11-04": [
+    { text: "Harp {4:30-5:00pm}", category: "personal" }
+],
+  "2025-11-05": [
+    { text: "Appointment {3-4pm}", category: "personal" },
+    { text: "Snare Drum Practice {6:30-7:30pm}", category: "band" },
+    { text: "Potential Job Shadow at DOSS {TBA}", category: "school" }
+],
+  "2025-11-06": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Scho-bowl Practice {8-9pm}", category: "clubs" },
+],
+  "2025-11-10": [{ text: "Scho-Bowl JV {4pm}", category: "clubs" }],
+  "2025-11-11": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2025-11-12": [{ text: "Appointment {2pm}", category: "personal" }],
+  "2025-11-13": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2025-11-14": [{ text: "Honors Band Music Due {11:59pm}", category: "band" }],
+  "2025-11-18": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2025-11-20": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2025-11-23": [{ text: "In Loving Memory of Grandma", category: "personal" }],
+  "2025-11-24": [{ text: "Grandma & Grandpa's Anniversary", category: "personal" }],
+  "2025-11-25": [
+    { text: "Harp {4:30-5:00pm}", category: "personal" },
+    { text: "Job Shadow Due", category: "school" }
+],
+  "2025-11-26": [
+    { text: "In Loving Memory of Grandpa", category: "personal" },
+    { text: "No School", category: "school" },
+],
+  "2025-11-27": [
+    { text: "Thanksgiving", category: "holidays" },
+    { text: "No School", category: "school" }
+],
+  "2025-11-28": [{ text: "No School", category: "school" }],
+
+////////// December //////////
+
+  "2025-12-01": [{ text: "No School", category: "school" }],
+  "2025-12-02": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2025-12-04": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2025-12-07": [{ text: "Band Concert {6:30pm}", category: "band" }],
+  "2025-12-09": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2025-12-11": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2025-12-12": [{ text: "College Classes End", category: "school" }],
+  "2025-12-15": [{ text: "Pep Band Girls {TBA}", category: "band" }],
+  "2025-12-16": [{ text: "Harp & Flute Ensemble {TBA}", category: "personal" }],
+  "2025-12-18": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Pep Band Girls {TBA}", category: "band" },
+],
+  "2025-12-23": [
+    { text: "Harp {4:30-5:00pm}", category: "personal" },
+    { text: "No School", category: "school" }
+],
+  "2025-12-24": [
+    { text: "Christmas Eve", category: "holidays" },
+    { text: "No School", category: "school" }
+],
+  "2025-12-25": [
+    { text: "Christmas Day", category: "holidays" },
+    { text: "No School", category: "school" }
+],
+  "2025-12-26": [{ text: "No School", category: "school" }],
+  "2025-12-27": [{ text: "No School", category: "school" }],
+  "2025-12-28": [{ text: "No School", category: "school" }],
+  "2025-12-29": [{ text: "No School", category: "school" }],
+  "2025-12-30": [{ text: "No School", category: "school" }],
+  "2025-12-31": [{ text: "No School", category: "school" }],
+  "2025-12-30": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2025-12-31": [{ text: "New Year's Eve", category: "holidays" }],
+
+////////// January //////////
+
+  "2026-01-01": [
+    { text: "New Year's Day", category: "holidays" },
+    { text: "No School", category: "school" }
+],
+  "2026-01-02": [{ text: "No School", category: "school" }],
+  "2026-01-03": [{ text: "Pep Band Boys {TBA}", category: "band" }],
+  "2026-01-06": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-01-07": [{ text: "Appointment {10am}", category: "personal" }],
+  "2026-01-08": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-01-09": [{ text: "Pep Band Boys {TBA}", category: "band" }],
+  "2026-01-13": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-01-15": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+    { text: "Pep Band Girls {TBA}", category: "band" },
+],
+  "2026-01-19": [
+    { text: "Martin Luther King Jr. Day", category: "holidays" },
+    { text: "No School", category: "school" },
+],
+  "2026-01-20": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-01-22": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-01-23": [{ text: "Pep Band Boys {TBA}", category: "band" },],
+  "2026-01-27": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-01-29": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+
+////////// February //////////
+  "2026-02-02": [
+    { text: "Groundhog Day", category: "holidays" },
+    { text: "Pep Band Girls {TBA}", category: "band" }
+],
+  "2026-02-03": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-02-05": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-02-06": [{ text: "Pep Band Boys {TBA}", category: "band" }],
+  "2026-02-07": [{ text: "Solo & Ensemble {TBA}", category: "band" }],
+  "2026-02-08": [{ text: "Band Concert {2pm}", category: "band" }],
+  "2026-02-10": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-02-12": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-02-13": [
+    { text: "No School", category: "school" },
+    { text: "Pep Band Boys {TBA}", category: "band" }
+],
+  "2026-02-14": [{ text: "Valentine's Day", category: "holidays" }],
+  "2026-02-16": [
+    { text: "Presidents' Day", category: "holidays" },
+    { text: "No School", category: "school" }
+],
+  "2026-02-17": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-02-19": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-02-20": [{ text: "Drama Performance {TBA}", category: "clubs" }],
+  "2026-02-21": [{ text: "Drama Performance {TBA}", category: "clubs" }],
+  "2026-02-22": [{ text: "Drama Performance {TBA}", category: "clubs" }],
+  "2026-02-24": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-02-26": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-02-27": [{ text: "Chicago Trip {TBA}", category: "band" }],
+  "2026-02-28": [{ text: "Chicago Trip {TBA}", category: "band" }],
+
+////////// March //////////
+
+  "2026-03-01": [{ text: "Chicago Trip {TBA}", category: "band" }],
+  "2026-03-03": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-03-05": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-03-08": [{ text: "Daylight Saving Time", category: "holidays" }],
+  "2026-03-10": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-03-12": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-03-13": [
+    { text: "ACT {TBA}", category: "school" },
+    { text: "Band Contest {TBA}", category: "band" },   
+],
+  "2026-03-14": [{ text: "Band Contest {TBA}", category: "band" }],
+  "2026-03-19": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-03-17": [
+    { text: "St. Patrick's Day", category: "holidays" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" },
+],
+  "2026-03-26": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-03-31": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+
+////////// April //////////
+  "2026-04-01": [{ text: "April Fools' Day", category: "holidays" }],
+  "2026-04-02": [{ text: "No School", category: "school" }],
+  "2026-04-03": [{ text: "No School", category: "school" }],
+  "2026-04-05": [{ text: "Easter", category: "holidays" }],
+  "2026-04-06": [{ text: "No School", category: "school" }],
+  "2026-04-07": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-04-09": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-04-014": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-04-16": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-04-21": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-04-22": [{ text: "Earth Day", category: "holidays" }],
+  "2026-04-23": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-04-26": [{ text: "Band Concert {7pm}", category: "band" }],
+  "2026-04-29": [{ text: "Harp {4:30-5:00pm}", category: "personal" }],
+  "2026-04-30": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+
+////////// May //////////
+
+  "2026-05-05": [
+    { text: "Cinco De Mayo", category: "holidays" },
+    { text: "Harp {4:30-5:00pm}", category: "personal" },
+],
+  "2026-05-07": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-05-10": [{ text: "Mother's Day", category: "holidays" }],
+  "2026-05-11": [{ text: "Band Banquet {TBA}", category: "band" }],
+  "2026-05-14": [
+    { text: "Chess Club {11:13am-12:16pm}", category: "clubs" },
+    { text: "TCG {3:30-4:30pm}", category: "clubs" },
+],
+  "2026-05-17": [{ text: "Graduation {TBA}", category: "band" }],
+  "2026-05-19": [{ text: "Exams {TBA}", category: "school" }],
+  "2026-05-20": [{ text: "Exams {TBA}", category: "school" }],
+  "2026-05-21": [{ text: "Last Day // Exams {TBA}", category: "school" }],
+  "2026-05-22": [{ text: "Memorial Day Parade {TBA}", category: "band" }],
+  "2026-05-25": [{ text: "Memorial Day", category: "holidays" }],
+
+};
+
+  function renderCalendar(){
+    const y = currentDate.getFullYear(), m = currentDate.getMonth();
+    monthNameEl.textContent = `${months[m]} ${y}`;
+    daysGrid.innerHTML = "";
+
+    const first = new Date(y, m, 1).getDay();
+    const days = new Date(y, m+1, 0).getDate();
+
+    // Empty slots before first day
+    for(let i=0; i<first; i++){
+      daysGrid.appendChild(document.createElement("div"));
+    }
+
+    // Build days
+    for(let d=1; d<=days; d++){
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+
+      const num = document.createElement("div");
+      num.className = "day-number";
+      num.textContent = d;
+
+      const cont = document.createElement("div");
+      cont.className = "day-content";
+
+      // 🔑 Construct YYYY-MM-DD key
+      const key = `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+      if(events[key]){
+  events[key].forEach(ev => {
+    // check if the category is toggled on
+    const visible = document.getElementById(`toggle-${ev.category}`).checked;
+    if(visible){
+      const p = document.createElement("div");
+      p.textContent = ev.text;
+      p.classList.add(ev.category); // so CSS can style it
+      cont.appendChild(p);
+    }
+  });
+}
+
+      cell.append(num, cont);
+      daysGrid.appendChild(cell);
+    }
+  }
+
+  prev.onclick = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
+  next.onclick = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
+
+  renderCalendar();
+  // Re-render calendar when filters change
+document.querySelectorAll('.filters input').forEach(cb => {
+  cb.addEventListener('change', renderCalendar);
+});
+</script>
+
+</body>
+</html>
